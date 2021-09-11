@@ -1,0 +1,231 @@
+<!doctype html>
+<html>
+  <head>
+    <title>The Haven Engine</title>
+	<link rel="stylesheet" href="mainTheme.css">
+  </head>
+  <body id="page">
+	<!--Main section-->
+	<div class="container">
+		<sup class="left">
+		<b>Haven Editor</b> version 2.0a<br>
+		<a href="#" style="text-shadow:1px 1px 0px #fd07; color:#ff0;">Support the development</a>
+		</sup>
+		<sup class="right">
+		<b>Links and info:</b><br>
+		<a href="#">See update log</a><br>
+		<a href="#">Report a bug</a><br>
+		
+		<a href="#">Become a developer</a><br>
+		<a href="#">Suggest a feature</a><br>
+		<a href="#">Press or business</a><br>
+		</sup>
+		
+		<div class="alertBorder">
+		<div class="alert">
+		<h1 id="title"><i>The</i>
+		<span style="text-shadow:2px 0px 0px #f007, -2px 0px 0px #00f7,2px 2px #0003;font-family:'arial black';">HAVEN EDITOR</span>
+		<i>is in</i> <span style="font-family:'arial black';color:red;">ALPHA</span></h1>
+		<b>Please be aware this project is in early alpha! <span style="font-family:'arial black';color:pink;">There <span style="font-family:'arial black';color:red;">WILL</span> be unfinished or missing features!</span></b>
+		</div>
+		</div>
+		<hr>
+		<span id="editor_section">
+		<div class="editorSection" style="background-color: #222; padding: 5px 30px;">
+			<div class="dropdown">
+				<span>File</span>
+				<div class="dropdown-content">
+					<a class="tooltip" id="save">Save as
+					<span class="tooltiptext">Download your project as a file to perminently store it.</span></a>
+					
+					<a class="tooltip disabled" id="saveLocal">Quicksave
+					<span class="tooltiptext">Save your project to localstorage. If you clear your browser data, it'll detele the files saved there.</span></a>
+					
+					<a class="tooltip disabled" id="load">Import Project
+					<span class="tooltiptext">Load a project file from your computer.</span></a>
+				
+					<a class="tooltip disabled" id="loadLocal">Load from Quicksave
+					<span class="tooltiptext">Load a project or autosave from localstorage (Quicksave).</span></a>
+				
+					<a class="tooltip disabled" id="loadLocal">Export
+					<span class="tooltiptext">Generates a version of your game that can run without the editor.</span></a>
+				</div>
+			</div>
+			
+			<div class="dropdown">
+				<span>Settings</span>
+				<div class="dropdown-content">
+					<a class="tooltip disabled" id="save">Editor Settings
+					<span class="tooltiptext">Settings such as enabling or disabling tooltips or Haven.</span></a>
+					
+					<a class="tooltip disabled" id="save">Engine Settings
+					<span class="tooltiptext">Settings for which systems to use with your game data. It's not recomeded you change these for an existing project.</span></a>
+					
+					<a class="tooltip disabled" id="save">Game Settings
+					<span class="tooltiptext">Settings for controls and global game systems.</span></a>
+					
+					<a class="tooltip disabled" id="save">Level Settings
+					<span class="tooltiptext">Settings to be applied per-level.</span></a>
+				</div>
+			</div>
+			
+		</div>
+		<div class="editorSection" style="background-color: #2c2c2c; height:100px; padding: 30px;">
+		Sample Text
+		</div>
+		<canvas
+			class="left"
+			id="editorCanvas"
+			width=1024
+			height=682
+		>
+		Your browser doesn't support HTML5 canvases. 
+		Try updating or downloading the latest version of Google Chrome or Brave.
+		</canvas>
+		
+		<div class="left editorSection" style="background-color: #333; width:calc(100% - 1084px); height:622px; padding: 30px;">
+		Sample Text
+		</div>
+		
+		
+	</div>
+	</span>
+	
+	<!--Documentation-->
+	<div class="container">
+		<div class="window">
+		<h1>Documentation</h1>
+		<hr>
+		
+		<p>There is currently no documentation. Sorry!</p>
+		
+		</div>
+	</div>
+	
+	<!--News-->
+	<div class="container">
+		<div class="window">
+		<h1>Planned Features / Q&amp;A</h1>
+		<hr>
+
+		
+		<p><b>Planned features:</b></p>
+		<!--Planned Features list-->
+		<ul>
+			<li>
+				Main editor | The centerpeice of the project.
+				<ul>
+					<li>
+						Data Structure | The core structure that handles data.
+						<ul>
+							<li>
+								Object | A generic object datatype with x, y, w, h, and some flags.
+								<ul>
+									<li>Colliding | An object with collision.</li>
+									<li>Static | An object which does not move.</li>
+									<li>Movable | An object that is capable of moving.</li>
+									<li>Overlap | An object that detects other objects overlapping it.</li>
+									<li>Transparent | For lighting purposes</li>
+									<li>Transparent Color | For lighting purposes</li>
+									<li>
+										Entity | An object that simulates physics
+										<ul>
+											<li>Player | An entity controled by a player.</li>
+											<li>AI | An otherwise player controlable entity controlled by an AI.</li>
+											<li>Pushable Object | An object that can be moved by other objects.</li>
+											<li>Projectile | An object launched or dropped, or otherwise something small moving at a high speed.</li>
+										</ul>
+									</li>
+									<li>Interactable | An object that the player can click on or press a button near.</li>
+								</ul>
+							</li>
+							<li>
+								Engine Manager | NOT THE ENGINE! The core bit that helps with compatability, including backwards compatabilty and forward compatability.
+								<ul>
+									<li>Engine Loader | Loads a non-integrated, perhaps modded engine or plugin.</li>
+									<li>Global Consistancy Patcher | Fixes old data by updating it, or makes newer objects convert for older engines.</li>
+								</ul>
+							</li>
+							<li>
+								Level Manager | Handles the easy grid-based level editor.
+								<ul>
+									<li>Object Grid | The grid system for the level.</li>
+									<li>Level compressor | A system for reducing the ammount of colliding objects without losing quality.</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+					<li>
+						Integrated Engine | The actual renderer and physics engine for the game.
+						<ul>
+							<li>
+								Renderer | The system that displays the game on screen.
+								<ul>
+									<li>Generic Layer | Unshaded images or shapes.</li>
+									<li>
+										Shader | Shading overlay and shaded images or shapes.
+										<ul>
+											<li>Pre-built lighting | Simple light casting that stops upon hitting a solid object, usually cast from multiple points on the light source.</li>
+											<li>Dynamic lighting | Simple light casting that stops upon hitting a solid object</li>
+											<li>Normals | A texture overlay to simulate 3d items.</li>
+											<li>
+												2d Ray Traced | Rays are cast and bounce off of surfaces, spreading the color and reflecting.
+												<ul>
+													<li>Dynamic Ray Tracing | Few rays cast from one point</li>
+													<li>Built Ray Tracing | Multiple rays cast from many points</li>
+												</ul>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							</li>
+							<li>
+								Physics Engine
+								<ul>
+									<li>Engine1 Generic 2d physics | Simple 2d physics without rotation.</li>
+									<li>Engine2 Advanced 2d physics | Advanced 2d physics including rolling.</li>
+									<li>Engine3 Complex 2d physics | Highly complex simulations including fluid simulation and buoyancy</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+					<li>Console | Display text, hopefully with colors. :)</li>
+				</ul>
+			</li>
+			<li>Logic Editor | An editor for making new gameplay elements easier. FUTURE</li>
+			<li>Documentation | A basic text guide. FUTURE</li>
+			<li>HAVEN Assistant | A live programming assistant that can walk you through creating a game. FUTURE</li>
+		</ul>
+		
+		</div>
+	</div>
+	
+	<!--Sound warning-->
+	<div class="overlay" id="soundOption">
+		<div class="alertBorder" style="margin:15% 25%;">
+			<div class="alert">
+			<h1>&lt;!&gt; SOUND WARNING &lt;!&gt;</h1>
+			<hr>
+			<p>This application uses sound effects and voiceover as part of the editor.
+			<b>It's not required</b> in order to use the engine,
+			but <i>some(non-vital)</i> features may be unavalible or seemingly broken.</p>
+			
+			<p>I'll work on adding sound-less versions of all the sound features
+			(using some sort of transcript feature, most likely.)</p>
+			
+			<a class="button tooltip" id="soundOn">Use sound
+			<span class="tooltiptext">Defaults to 20% volume. We don't want to blast your ears.</span></a>
+			
+			<a class="button tooltip" id="soundOff">Disable sound
+			<span class="tooltiptext">Sound will still be present when you run your game.<br>You can enable editor sounds later in the editor settings.</span></a>
+			</div>
+	</div>
+	
+	<script src="jQuery.js"></script>
+	<script src="core.js"></script>
+	<script src="data.js"></script>
+	<script src="engine.js"></script>
+	
+	
+  </body>
+</html>
