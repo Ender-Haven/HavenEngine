@@ -20,6 +20,9 @@ function graphicsInit(ctx, canvas) {
         image.src = base64;
         image.onload = () => ctx.drawImage(image, x, y, w, h);
     }
+    window.image = (img, x, y, w, h) => {
+        ctx.drawImage(img, x, y, w, h);
+    }
 }
 
 export default graphicsInit;

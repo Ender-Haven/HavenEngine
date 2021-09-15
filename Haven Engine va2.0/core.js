@@ -15,6 +15,7 @@ var height = 0; // Canvas dimensions
 var mouseX = 0;
 var mouseY = 0; // Mouse position relative to canvas
 var mouseClicked = () => {}; // This will be defined as a function and executed when the user clicks
+var keys = [];
 var clicked = false; // True for one frame on mouse click
 var draw;
 // Canvas context
@@ -50,11 +51,14 @@ soundOff.onclick = () => {
 function init() {
     // Get the canvas and set ctx to canvas context.
 	const canvas = document.getElementById('editorCanvas');
-	ctx = canvas.getContext('2d');
-
-    // Get the width and height of the canvas.
+    canvas.width = canvas.getBoundingClientRect().width * 2;
+    canvas.height = canvas.getBoundingClientRect().height * 2;
 	width = canvas.width;
 	height = canvas.height;
+    canvas.style.width = width / 2 + "px";
+    canvas.style.height = height / 2 + "px";
+
+	ctx = canvas.getContext('2d');
 	
     // Find the canvas' offset to correct mouse position.
 	var offset = {
@@ -66,22 +70,32 @@ function init() {
 
     // corrects mouse position when the page has been scrolled.
 	var scrollTop = 0;
-	document.addEventListener('mousemove', event => {
+	canvas.addEventListener('mousemove', event => {
 		scrollTop = $(window).scrollTop();
 		mouseX = (event.clientX - offset.x);
 		mouseY = ((event.clientY - offset.y) + scrollTop);
 	});
-	document.addEventListener('scroll', e => {
+	canvas.addEventListener('scroll', e => {
+        e.preventDefault();
 		scrollTop = $(window).scrollTop();
 		mouseX = -1;
 		mouseY = -1;
 	});
-
     // Run mouseClicked() on click.
-	document.addEventListener('click', event => {
+	canvas.addEventListener('click', event => {
         clicked = true;
 		mouseClicked();
 	});
+    window.addEventListener("keydown", e => {
+        e.preventDefault();
+        keys[e.keyCode] = true;
+    });
+    window.addEventListener("keyup", e => {
+        e.preventDefault();
+        keys[e.keyCode] = false;
+    });
+
+
 	
     // Define display library functions
     graphicsInit(ctx, canvas);
@@ -140,22 +154,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
 //not-working> Displays the level's objects with no calculations.
 //note> Could be good for screenshots, I guess.
-Level.prototype.display = function(){
-	for(var i = 0; i < this.objects.length; i++){
+Level.prototype.display = function() {
+    background(0, 0, 0);
+    player.display();
+	for(var i = 0; i < this.objects.length; i++) {
 		this.objects[i].display();
 	} 
+}
+Level.prototype.update = function() {
+    player.update(this.objects);
 }
 
 //not-working> Displays the object.
 GameObject.prototype.display = function() {
 	fill(0, 0, 0);
-    let texture = this.texture;
-    if(typeof this.texture !== "string") {
-        rect(this.x, this.y, this.w, this.h);
+    if(this.shape.length) {
+        ctx.beginPath();
+        ctx.moveTo(this.shape[0][0] + this.x, this.shape[0][1] + this.y);
+        for(let i = 1; i < this.shape.length; i++) {
+            ctx.lineTo(this.shape[i][0] + this.x, this.shape[i][1] + this.y);
+        }
+        ctx.fill();
+        ctx.stroke();
+        ctx.closePath();
     } else {
-        base64Image(texture, this.x, this.y, this.w, this.h);
+        if(typeof this.texture === "boolean") {
+            rect(this.x, this.y, this.w, this.h);
+        } else {
+            if(typeof this.texture !== "object" && typeof this.texture !== "string") {
+                base64Image(this.texture, this.x, this.y, this.w, this.h);
+            } else {
+                image(this.texture, this.x, this.y, this.w, this.h);
+            }
+        }
     }
-}
+};
+
+GameObject.prototype.controls = function() {
+    this.v.x = 0;
+    if((keys[87] || keys[32] || keys[38]) && this.canJump) {
+        this.v.y -= 7;
+    }
+
+    if(keys[65] || keys[37]) {
+        this.v.x -= 2;
+    }
+    if(keys[68] || keys[39]) {
+        this.v.x += 2;
+    }
+};
 
 // The level the user is editing or playing.
 var activeLevel = "default";
@@ -166,15 +213,72 @@ var world = {
 };
 
 // Attempts to add a non colliding static object. [REMOVE IN FINAL]
-world.default.objects.push(new GameObject("static", 10, 10, 20, 20, false, false, true, 1,));
+const player = new GameObject({
+    type : "player",
+    x : 20,
+    y : 20,
+    w : 40,
+    h : 40,
+    shape : [],
+    colliding : true,
+    toDisplay : true,
+    opacity : 1,
+    velocity : { x : 0, y : 0 },
+    animated : null,
+    texture : false,
+    normals : 0,
+    RMD : 0
+});
+
+world.default.objects.push(new GameObject({
+    type : "static",
+    x : 0,
+    y : 700,
+    w : 400,
+    h : 10,
+    shape : false,
+    colliding : false,
+    toDisplay : true,
+    opacity : 1,
+    velocity : { x : 0, y : 0 },
+    animated : null,
+    texture : false,
+    normals : 0,
+    RMD : 0,
+    xCollisions : {
+        top : () => {
+            this.v.y = this.v.y < -1 ? -(this.v.y + 1) : 0;
+            this.y = obj.y - this.h;
+            this.canJump = !this.v.y;
+        }
+    }
+}));
 
 (async () => {
     let b64 = await getBase64FromUrl("https://upload.wikimedia.org/wikipedia/commons/3/39/C_Hello_World_Program.png");
-    world.default.objects.push(new GameObject("static", 30, 30, 200, 200, false, false, true, 1, undefined, undefined, b64));
+    world.default.objects.push(new GameObject({
+        type : "static",
+        x : 60,
+        y : 60,
+        w : 200,
+        h : 200,
+        shape : [],
+        colliding : false,
+        toDisplay : true,
+        opacity : 1,
+        velocity : { x : 0, y : 0 },
+        animated : null,
+        texture : b64,
+        normals : 0,
+        RMD : 0
+    }));
 })();
 
 // Replaces init's default draw.
-draw = () => world[activeLevel].display();
+draw = () => {
+    world[activeLevel].display();
+    world[activeLevel].update();
+};
 
 
 const testUpload = document.getElementById("test-upload");
