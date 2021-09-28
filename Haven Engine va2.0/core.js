@@ -1,3 +1,4 @@
+
 import Level from "/Level.js";
 import GameObject from "/GameObject.js";
 import graphicsInit from "/graphicsInit.js";
@@ -7,7 +8,7 @@ import getBase64FromUrl from "/urlToBase64.js";
 // This will act as a library for the engine, everything else will likely be dependent on this to work.
 
 // Engine version.
-const version = "2.0a";
+const version = "2.1a";
 // to-do> Use version to modify index.html's verion number display
 
 var width = 0;
@@ -70,11 +71,18 @@ function init() {
 
     // corrects mouse position when the page has been scrolled.
 	var scrollTop = 0;
+    var onCanvas = false;
 	canvas.addEventListener('mousemove', event => {
 		scrollTop = $(window).scrollTop();
 		mouseX = (event.clientX - offset.x);
 		mouseY = ((event.clientY - offset.y) + scrollTop);
 	});
+    canvas.addEventListener("mouseenter", event => {
+        onCanvas = true;
+    });
+    canvas.addEventListener("mouseleave", event => {
+        onCanvas = false;
+    });
 	canvas.addEventListener('scroll', e => {
         e.preventDefault();
 		scrollTop = $(window).scrollTop();
@@ -87,12 +95,16 @@ function init() {
 		mouseClicked();
 	});
     window.addEventListener("keydown", e => {
-        e.preventDefault();
-        keys[e.keyCode] = true;
+        if(onCanvas) {
+            e.preventDefault();
+            keys[e.keyCode] = true;
+        }
     });
     window.addEventListener("keyup", e => {
-        e.preventDefault();
-        keys[e.keyCode] = false;
+        if(onCanvas) {
+            e.preventDefault();
+            keys[e.keyCode] = false;
+        }
     });
 
 
@@ -148,6 +160,7 @@ function init() {
 document.addEventListener('DOMContentLoaded', () => {
     if(!initialised) {
         init();
+        initialised = true;
     }
 });
 
@@ -159,10 +172,14 @@ Level.prototype.display = function() {
     player.display();
 	for(var i = 0; i < this.objects.length; i++) {
 		this.objects[i].display();
+		this.objects[i].setSave();
 	} 
 }
 Level.prototype.update = function() {
     player.update(this.objects);
+    let saveData = JSON.stringify(this.save(), null, 4);
+    document.getElementById("save-json").textContent = saveData;
+    this.download(downloadLink, saveData);
 }
 
 //not-working> Displays the object.
@@ -181,28 +198,39 @@ GameObject.prototype.display = function() {
         if(typeof this.texture === "boolean") {
             rect(this.x, this.y, this.w, this.h);
         } else {
-            if(typeof this.texture !== "object" && typeof this.texture !== "string") {
-                base64Image(this.texture, this.x, this.y, this.w, this.h);
+            if(this.textureDisplay) {
+                image(this.textureDisplay, this.x, this.y, this.w, this.h);
             } else {
-                image(this.texture, this.x, this.y, this.w, this.h);
+                base64Image(this.texture, this.x, this.y, this.w, this.h);
             }
         }
     }
 };
 
 GameObject.prototype.controls = function() {
-    this.v.x = 0;
+    this.v.x = !this.friction ? 0 : this.v.x / this.friction;
+
     if((keys[87] || keys[32] || keys[38]) && this.canJump) {
-        this.v.y -= 7;
+        this.v.y -= this.jumpBoost;
+        this.friction = 2;
+        this.speed = 1;
     }
 
     if(keys[65] || keys[37]) {
-        this.v.x -= 2;
+        this.v.x -= this.speed;
     }
     if(keys[68] || keys[39]) {
-        this.v.x += 2;
+        this.v.x += this.speed;
     }
 };
+
+GameObject.prototype.setSave = function() {
+    if(!this.shape.length) {
+        if(mouseX <= this.x / 2 + this.w / 2 && mouseX >= this.x / 2 && mouseY <= this.y / 2 + this.h / 2 && mouseY >= this.y / 2 && clicked) {
+            this.save = !this.save;
+        }
+    }
+}
 
 // The level the user is editing or playing.
 var activeLevel = "default";
@@ -227,7 +255,10 @@ const player = new GameObject({
     animated : null,
     texture : false,
     normals : 0,
-    RMD : 0
+    RMD : 0,
+    speed : 2,
+    jumpBoost : 7,
+    friction : 0
 });
 
 world.default.objects.push(new GameObject({
@@ -245,13 +276,29 @@ world.default.objects.push(new GameObject({
     texture : false,
     normals : 0,
     RMD : 0,
-    xCollisions : {
-        top : () => {
-            this.v.y = this.v.y < -1 ? -(this.v.y + 1) : 0;
-            this.y = obj.y - this.h;
-            this.canJump = !this.v.y;
-        }
+    xCollisionsTop : function(p) {
+        p.v.y = p.v.y > 1 ? -p.v.y / 2 : 0;
+        p.y = this.y - p.h + p.v.y;
+        p.canJump = true;
+        p.jumpBoost = 10;
     }
+}));
+
+world.default.objects.push(new GameObject({
+    type : "static",
+    x : 400,
+    y : 600,
+    w : 400,
+    h : 110,
+    shape : false,
+    colliding : false,
+    toDisplay : true,
+    opacity : 1,
+    velocity : { x : 0, y : 0 },
+    animated : null,
+    texture : false,
+    normals : 0,
+    RMD : 0
 }));
 
 (async () => {
@@ -259,7 +306,7 @@ world.default.objects.push(new GameObject({
     world.default.objects.push(new GameObject({
         type : "static",
         x : 60,
-        y : 60,
+        y : 260,
         w : 200,
         h : 200,
         shape : [],
@@ -278,6 +325,7 @@ world.default.objects.push(new GameObject({
 draw = () => {
     world[activeLevel].display();
     world[activeLevel].update();
+    background("#533");
 };
 
 
@@ -286,3 +334,33 @@ testUpload.oninput = async () => base64Image((await getUpload(testUpload))[0], 0
 
 const testURL = document.getElementById("test-url");
 testURL.oninput = async () => base64Image(await getBase64FromUrl(testURL.value), 0, 0, width, height);
+
+const JSONInput = document.getElementById("json-input");
+JSONInput.oninput = () => {
+    let data = JSON.parse(JSONInput.value);
+
+    if(data.length) {
+        for(let i = 0; i < data.length; i++) {
+            world.default.revert(new GameObject(data[i]));
+        }
+    } else {
+        world.default.revert([ new GameObject(data) ]);
+    }
+}
+
+
+const uploadJSON = document.getElementById("load");
+const downloadLink = document.getElementById('save');
+
+
+uploadJSON.addEventListener("change", event => {
+    let reader = new FileReader();
+    reader.onload = event => {
+        let data = JSON.parse(JSON.parse(event.target.result));
+        for(let i = 0; i < data.length; i++) {
+            let obj = new GameObject(data[i]);
+            world.default.revert(obj);
+        }
+    };
+    reader.readAsText(event.target.files[0]);
+});

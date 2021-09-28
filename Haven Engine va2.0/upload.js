@@ -10,7 +10,6 @@ async function getUpload(input) {
 
     let files = Array.from(input.files);
     files = await Promise.all(files.map(async (v, i) => await toBase64(v)));
-    console.log(files);
 
     return files;
 }

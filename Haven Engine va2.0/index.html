@@ -8,7 +8,7 @@
         <!--Main section-->
         <div class = "container">
             <sup class = "left">
-                <b>Haven Editor</b> version 2.0a
+                <b>Haven Editor</b> version 2.1a
                 <br>
                 <a href = "#" style = "text-shadow : 1px 1px 0px #fd07; color : #ff0;">Support the development</a>
             </sup>
@@ -48,17 +48,17 @@
                     <div class = "dropdown">
                         <span>File</span>
                         <div class = "dropdown-content">
-                            <a class = "tooltip" id = "save">Save as
+                            <a class = "tooltip enabled" id = "save">Save as
                                 <span class = "tooltiptext">Download your project as a file to perminently store it.</span>
                             </a>
                             
                             <a class = "tooltip disabled" id = "saveLocal">Quicksave
                                 <span class = "tooltiptext">Save your project to localstorage. If you clear your browser data, it'll detele the files saved there.</span>
                             </a>
-                            
-                            <a class = "tooltip disabled" id = "load">Import Project
+                            <input id = "load" name = "load" style = "display : block; margin : 0; padding : 0; width : 0.1px; height : 0.1px; opacity : 0.01;" type = "file">
+                            <label for = "load" class = "tooltip enabled" id = "load-label">Import Project
                                 <span class="tooltiptext">Load a project file from your computer.</span>
-                            </a>
+                            </label>
                         
                             <a class = "tooltip disabled" id = "loadLocal">Load from Quicksave
                                 <span class = "tooltiptext">Load a project or autosave from localstorage (Quicksave).</span>
@@ -230,6 +230,11 @@
 
         <input type = "file" id = "test-upload">
         <input type = "text" id = "test-url">
+        <textarea id = "json-input"></textarea>
+        <input type = "file" id = "json-upload">
+
+        <div id = "save-json" style = "white-space : pre-wrap;"></div>
+        <a id = "download-link">Download current GameObject data</a>
         
     <!--jQuery, because I'm too lazy to type it up in basic javascript-->
         <script src = "jQuery.js"></script>

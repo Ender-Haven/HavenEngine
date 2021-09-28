@@ -6,7 +6,7 @@ var engineSettings = {
 
 // Data for the game itself that allows the game to be saved
 var gameData = {
-	version : "2.0a",
+	version : "2.1a",
 	world : {},
 	engine : {
 		render:{
@@ -26,7 +26,8 @@ var gameData = {
 			resolution : 0,
 		},
 		postProcesses : [
-			"vignette",
+			{ type : "vignette", ammout : 10 },
+      { type : "greyscale", ammout : 10 },
 		],
 	},
 };
@@ -56,8 +57,7 @@ function loadTextFile(file) {
 	var allText = "";
     var rawFile = new XMLHttpRequest();
     rawFile.open("GET", file, false);
-    rawFile.onreadystatechange = function ()
-    {
+    rawFile.onreadystatechange = function() {
         if(rawFile.readyState === 4)
         {
             if(rawFile.status === 200 || rawFile.status == 0)
@@ -65,13 +65,13 @@ function loadTextFile(file) {
                 allText = rawFile.responseText;
             }
         }
-    }
+    };
     rawFile.send(null);
 	return(allText);
 }
 
 // Loading test data from a file [REMOVE IN FINAL]
-gameData = JSON.parse(loadTextFile("default.txt"));
+// gameData = JSON.parse(loadTextFile("default.txt"));
 
 // Adds functionality to the save button.
 document.getElementById('save').addEventListener('click', () => {
