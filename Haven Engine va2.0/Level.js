@@ -7,7 +7,16 @@ const Level = function(){
     this.save = function() {
         return this.objects
             .map(v => { return { ...v }; })
-            .map((v, i) => { v.id = i; v.textureDisplay = false; if(v.save) return v; })
+            .map((v, i) => {
+                v.id = i;
+                v.textureDisplay = false;
+                for(let i in v) {
+                    if(typeof v[i] === "function") {
+                        delete v[i];
+                    }
+                }
+                if(v.save) return v;
+            })
             .filter(v => !!v);
     };
     this.revert = function(objects) {

@@ -6,7 +6,7 @@ var engineSettings = {
 
 // Data for the game itself that allows the game to be saved
 var gameData = {
-	version : "2.1a",
+	version : "2.1.1a",
 	world : {},
 	engine : {
 		render:{

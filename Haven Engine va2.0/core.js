@@ -4,11 +4,14 @@ import GameObject from "/GameObject.js";
 import graphicsInit from "/graphicsInit.js";
 import getUpload from "/upload.js";
 import getBase64FromUrl from "/urlToBase64.js";
+import localforage from "https://unpkg.com/localforage@1.7.3/src/localforage.js";
+
+localforage.config();
 
 // This will act as a library for the engine, everything else will likely be dependent on this to work.
 
 // Engine version.
-const version = "2.1a";
+const version = "2.1.1a";
 // to-do> Use version to modify index.html's verion number display
 
 var width = 0;
@@ -325,7 +328,6 @@ world.default.objects.push(new GameObject({
 draw = () => {
     world[activeLevel].display();
     world[activeLevel].update();
-    background("#533");
 };
 
 
@@ -363,4 +365,29 @@ uploadJSON.addEventListener("change", event => {
         }
     };
     reader.readAsText(event.target.files[0]);
+});
+
+const quickLoad = document.getElementById("loadLocal");
+
+quickLoad.addEventListener("click", () => {
+    localforage.getItem("game").then(result => {
+        result = JSON.parse(result);
+
+        if(result.length) {
+            for(let i = 0; i < result.length; i++) {
+                world.default.revert(new GameObject(result[i]));
+            }
+        } else {
+            world.default.revert([ new GameObject(result) ]);
+        }
+    });
+});
+
+window.addEventListener('beforeunload', (event) => {
+    // Cancel the event as stated by the standard.
+    event.preventDefault();
+    let saveData = JSON.stringify(world.default.save(), null, 4);
+    localforage.setItem("game", saveData);
+    // Chrome requires returnValue to be set.
+    event.returnValue = "Are you sure you want to leave?";
 });
