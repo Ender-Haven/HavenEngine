@@ -2,11 +2,15 @@
 import Level from "/Level.js";
 import GameObject from "/GameObject.js";
 import graphicsInit from "/graphicsInit.js";
+import functionKeywords from "/function-keywords.js";
 import getUpload from "/upload.js";
+import havenInit from "/haven.js";
 import getBase64FromUrl from "/urlToBase64.js";
 import localforage from "https://unpkg.com/localforage@1.7.3/src/localforage.js";
+import { changeTab, currentTab, tabInfo } from "/editorTab.js";
 
 localforage.config();
+functionKeywords();
 
 // This will act as a library for the engine, everything else will likely be dependent on this to work.
 
@@ -21,7 +25,9 @@ var mouseY = 0; // Mouse position relative to canvas
 var mouseClicked = () => {}; // This will be defined as a function and executed when the user clicks
 var keys = [];
 var clicked = false; // True for one frame on mouse click
+var drag = { now:false, x:null, y:null }; // True while mouse is pressed
 var draw;
+var secretDraw = () => {};
 // Canvas context
 var ctx;
 
@@ -29,7 +35,7 @@ var ctx;
 var initialised = false;
 //note> It's true by default because picking a sound option will allow it to intiate with special settings
 //note> Could be useful for other special pre-init settings as well
-var volume = 0.2; // Audio volume. Has to be applied
+var volume = 0.0; // Audio volume. Has to be applied
 
 const elem = document.getElementById("page"); // The main page.
 
@@ -66,9 +72,9 @@ function init() {
 	
     // Find the canvas' offset to correct mouse position.
 	var offset = {
-		x : Math.round(window.scrollX +
+		x: Math.round(window.scrollX +
 		document.querySelector("#editorCanvas").getBoundingClientRect().left), // X
-		y : Math.round(window.scrollY +
+		y: Math.round(window.scrollY +
 		document.querySelector("#editorCanvas").getBoundingClientRect().top), // Y
 	}
 
@@ -97,6 +103,14 @@ function init() {
         clicked = true;
 		mouseClicked();
 	});
+  canvas.addEventListener('mousedown', event => {
+    drag.now=true;
+    drag.x=mouseX;
+    drag.y=mouseY;
+	});
+  canvas.addEventListener('mouseup', event => {
+    drag.now=false;
+	});
     window.addEventListener("keydown", e => {
         if(onCanvas) {
             e.preventDefault();
@@ -114,6 +128,8 @@ function init() {
 	
     // Define display library functions
     graphicsInit(ctx, canvas);
+    havenInit();
+    haven("Testing internal Haven systems.","Considering you're reading this, it probably worked.",250,250);
     
     /**
      * A simple button that runs function onClick() when clicked.
@@ -129,17 +145,19 @@ function init() {
      * 
      * @returns {void}
      */
-	let button = (x, y, w, h, onClick, c1, c2, cs) => {
-        fill(ctx, c1 || "#FFF");
-        stroke(ctx, cs || '#000');
-        if(mouseX >= x && mouseX <= x + w && mouseY > y && mouseY <= y + h){
-            fill(ctx, c2 || "#EEF");
+	window.button = (x, y, w, h, onClick, c1, c2, cs) => {
+        fill(c1 || "#FFF");
+        stroke(cs || '#000');
+        if(mouseX >= x / 2 && mouseX <= (x + w) / 2 && mouseY > y / 2 && mouseY <= (y + h) / 2){
+            fill(c2 || "#EEF");
+            canvas.style.cursor = "pointer";
             if(clicked) {
                 clicked = false;
                 onClick();
             }
         }
-        rect(ctx, x, y, w, h);
+
+        rect(x, y, w, h);
 	};
 	
     // Default draw function.
@@ -151,7 +169,9 @@ function init() {
 	
     // Runs draw() whenever possible.
 	setInterval(() => {
+        canvas.style.cursor = "default";
 		draw();
+        secretDraw();
 		clicked = false;
 	}, 1);
 	
@@ -171,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
 //not-working> Displays the level's objects with no calculations.
 //note> Could be good for screenshots, I guess.
 Level.prototype.display = function() {
-    background(0, 0, 0);
+    //background(0, 0, 0);
     player.display();
 	for(var i = 0; i < this.objects.length; i++) {
 		this.objects[i].display();
@@ -187,7 +207,8 @@ Level.prototype.update = function() {
 
 //not-working> Displays the object.
 GameObject.prototype.display = function() {
-	fill(0, 0, 0);
+	fill("#000000");
+
     if(this.shape.length) {
         ctx.beginPath();
         ctx.moveTo(this.shape[0][0] + this.x, this.shape[0][1] + this.y);
@@ -211,19 +232,21 @@ GameObject.prototype.display = function() {
 };
 
 GameObject.prototype.controls = function() {
-    this.v.x = !this.friction ? 0 : this.v.x / this.friction;
-
+    this.v.x = !this.friction ? 0: this.v.x / this.friction;
+    
     if((keys[87] || keys[32] || keys[38]) && this.canJump) {
         this.v.y -= this.jumpBoost;
         this.friction = 2;
         this.speed = 1;
     }
 
-    if(keys[65] || keys[37]) {
-        this.v.x -= this.speed;
-    }
-    if(keys[68] || keys[39]) {
-        this.v.x += this.speed;
+    if(this.canMove) {
+        if(keys[65] || keys[37]) {
+            this.v.x -= this.speed;
+        }
+        if(keys[68] || keys[39]) {
+            this.v.x += this.speed;
+        }
     }
 };
 
@@ -240,95 +263,98 @@ var activeLevel = "default";
 
 // The game world, contains the levels.
 var world = {
-	default : new Level()
+	default: new Level()
 };
 
 // Attempts to add a non colliding static object. [REMOVE IN FINAL]
 const player = new GameObject({
-    type : "player",
-    x : 20,
-    y : 20,
-    w : 40,
-    h : 40,
-    shape : [],
-    colliding : true,
-    toDisplay : true,
-    opacity : 1,
-    velocity : { x : 0, y : 0 },
-    animated : null,
-    texture : false,
-    normals : 0,
-    RMD : 0,
-    speed : 2,
-    jumpBoost : 7,
-    friction : 0
+    type: "player",
+    x: 20,
+    y: 20,
+    w: 40,
+    h: 40,
+    shape: [],
+    colliding: true,
+    toDisplay: true,
+    opacity: 1,
+    velocity: { x: 0, y: 0 },
+    animated: null,
+    texture: false,
+    normals: 0,
+    RMD: 0,
+    speed: 2,
+    jumpBoost: 7,
+    friction: 0
 });
 
 world.default.objects.push(new GameObject({
-    type : "static",
-    x : 0,
-    y : 700,
-    w : 400,
-    h : 10,
-    shape : false,
-    colliding : false,
-    toDisplay : true,
-    opacity : 1,
-    velocity : { x : 0, y : 0 },
-    animated : null,
-    texture : false,
-    normals : 0,
-    RMD : 0,
-    xCollisionsTop : function(p) {
-        p.v.y = p.v.y > 1 ? -p.v.y / 2 : 0;
-        p.y = this.y - p.h + p.v.y;
-        p.canJump = true;
-        p.jumpBoost = 10;
-    }
+    type: "static",
+    x: 0,
+    y: 700,
+    w: 400,
+    h: 10,
+    shape: false,
+    colliding: false,
+    toDisplay: true,
+    opacity: 1,
+    velocity: { x: 0, y: 0 },
+    animated: null,
+    texture: false,
+    normals: 0,
+    RMD: 0,
+    xCollisionsTop: "bouncy"
 }));
 
 world.default.objects.push(new GameObject({
-    type : "static",
-    x : 400,
-    y : 600,
-    w : 400,
-    h : 110,
-    shape : false,
-    colliding : false,
-    toDisplay : true,
-    opacity : 1,
-    velocity : { x : 0, y : 0 },
-    animated : null,
-    texture : false,
-    normals : 0,
-    RMD : 0
+    type: "static",
+    x: 400,
+    y: 600,
+    w: 400,
+    h: 110,
+    shape: false,
+    colliding: false,
+    toDisplay: true,
+    opacity: 1,
+    velocity: { x: 0, y: 0 },
+    animated: null,
+    texture: false,
+    normals: 0,
+    RMD: 0
 }));
 
 (async () => {
     let b64 = await getBase64FromUrl("https://upload.wikimedia.org/wikipedia/commons/3/39/C_Hello_World_Program.png");
     world.default.objects.push(new GameObject({
-        type : "static",
-        x : 60,
-        y : 260,
-        w : 200,
-        h : 200,
-        shape : [],
-        colliding : false,
-        toDisplay : true,
-        opacity : 1,
-        velocity : { x : 0, y : 0 },
-        animated : null,
-        texture : b64,
-        normals : 0,
-        RMD : 0
+        type: "static",
+        x: 60,
+        y: 260,
+        w: 200,
+        h: 200,
+        shape: [],
+        colliding: false,
+        toDisplay: true,
+        opacity: 1,
+        velocity: { x: 0, y: 0 },
+        animated: null,
+        texture: b64,
+        normals: 0,
+        RMD: 0,
+        xCollisionsTop: "bouncy",
+        xCollisionsBottom: "bouncy",
+        xCollisionsRight: "bouncy",
+        xCollisionsLeft: "bouncy"
     }));
 })();
 
 // Replaces init's default draw.
 draw = () => {
+    background("#112")
     world[activeLevel].display();
     world[activeLevel].update();
+    // background("#0f0")
+    // button(100, 100, 100, 100, () => {}, "#303030", "#000000", "#202020")
 };
+
 
 
 const testUpload = document.getElementById("test-upload");
@@ -391,3 +417,57 @@ window.addEventListener('beforeunload', (event) => {
     // Chrome requires returnValue to be set.
     event.returnValue = "Are you sure you want to leave?";
 });
+
+
+const addObject = document.getElementById("add-object");
+
+addObject.addEventListener("click", function() {
+    changeTab(".add-object");
+
+    // create a self contained environment
+    let thisTab = {};
+    // it needs to house a GameObject
+    thisTab.GO = new GameObject({
+        x: 0,
+        y: 0,
+        w: 50,
+        h: 50,
+        shape: [],
+        colliding: false,
+        toDisplay: true,
+        opacity: 1,
+        velocity: { x: 0, y: 0 },
+        animated: null,
+        texture: false,
+        normals: 0,
+        RMD: 0
+    });
+
+    secretDraw = () => thisTab.GO.display();
+    // it also needs to be connected to all inputs from the current tab
+    // these inputs needs to be linked to the corresponding GameObject values
+    let inputs = tabInfo();
+    let x = inputs[0];
+    x.onkeyup = x.onchange = x.oninput = x.onmousescroll = () => thisTab.GO.x = Number(x.value) * 2;
+    let y = inputs[1];
+    y.onkeyup = y.onchange = y.oninput = y.onmousescroll = () => thisTab.GO.y = Number(y.value) * 2;
+    let w = inputs[2];
+    w.onkeyup = w.onchange = w.oninput = w.onmousescroll = () => thisTab.GO.w = Number(w.value) * 2;
+    let h = inputs[3];
+    h.onkeyup = h.onchange = h.oninput = h.onmousescroll = () => thisTab.GO.h = Number(h.value) * 2;
+    let submit = inputs[4];
+    // when the user decides, the GameObject is pushed to world.default.objects and the environment is killed
+    // when the environment is killed, all inputs must be cleansed
+    submit.onclick = () => {
+        world.default.objects.push(thisTab.GO);
+
+        x.value = "";
+        y.value = "";
+        w.value = "";
+        h.value = "";
+
+        changeTab(1);
+    };
+});
+
+changeTab(1);

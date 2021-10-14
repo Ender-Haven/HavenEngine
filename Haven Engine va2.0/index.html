@@ -6,7 +6,14 @@
         <link rel = "stylesheet" href = "mainTheme.css">
     </head>
     <body id = "page">
-        <!--Main section-->
+        <!-- Custom Context Menu -->
+        <div class="ctxmenu">
+            <button class="buttonalt">Ask Haven</button>
+            <button class="buttonalt">Inspect</button>
+        </div>
+
+
+        <!-- Main section -->
         <div class = "container">
             <sup class = "left">
                 <b>Haven Editor</b> version 2.1.1a
@@ -30,7 +37,7 @@
             
             <div class = "alertBorder">
                 <div class = "alert" style="height:100px;">
-                    <h1 id = "title"><img src="Assets/logo.png" height="100px" style="float:left; margin-right:20px;">
+                    <h1 id = "title"><img src="Assets/logo.png" height="100px" style="float:left; margin-right:20px; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.55));">
                         <i>is in</i>
                         <span style = "font-family : 'arial black'; color : red;">ALPHA</span>
                     </h1>
@@ -46,7 +53,7 @@
                 <div class = "editorSection" style = "background-color : #222; padding : 5px 30px;">
                     <!--File Options Dropdown-->
                     <div class = "dropdown">
-                        <span>File</span>
+                        <span><img width="12pt" src="Assets/Icons/Save@2x.png"> File</span>
                         <div class = "dropdown-content">
                             <a class = "tooltip enabled" id = "save">Save as
                                 <span class = "tooltiptext">Download your project as a file to perminently store it.</span>
@@ -55,7 +62,7 @@
                             <a class = "tooltip disabled" id = "saveLocal">Quicksave
                                 <span class = "tooltiptext">Save your project to localstorage. If you clear your browser data, it'll detele the files saved there.</span>
                             </a>
-                            <input id = "load" name = "load" style = "display : block; margin : 0; padding : 0; width : 0.1px; height : 0.1px; opacity : 0.01;" type = "file">
+                            <input id = "load" name = "load" style = "display : block; margin : 0; padding : 0; width : 0.1px; height : 0.1px; opacity : 0.01;" type = "file"></input>
                             <label for = "load" class = "tooltip enabled" id = "load-label">Import Project
                                 <span class="tooltiptext">Load a project file from your computer.</span>
                             </label>
@@ -72,7 +79,7 @@
                     
                     <!--Project Options Dropdown-->
                     <div class = "dropdown">
-                        <span>Settings</span>
+                        <span><img width="12pt" src="Assets/Icons/Settings@2x.png"> Settings</span>
                         <div class = "dropdown-content">
                             <a class = "tooltip disabled" id = "save">Editor Settings
                                 <span class = "tooltiptext">Settings such as enabling or disabling tooltips or Haven.</span>
@@ -89,13 +96,59 @@
                             <a class = "tooltip disabled" id = "save">Level Settings
                                 <span class = "tooltiptext">Settings to be applied per-level.</span>
                             </a>
+                            
                         </div>
                     </div>
                 </div>
             </div>
 
             <!--Top section-->
-            <div class = "editorSection" style = "background-color : #2c2c2c; height : 100px; padding : 30px;">Sample Text</div>
+            <div class = "editorSection" style = "background-color : #2c2c2c; height : 100px; padding : 30px;">
+              <!--<span class = "tooltiptext"></span>-->
+              <span class="tooltip" id = "add-object">
+                <img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/Add@2x.png">
+                <span class = "tooltiptext">Add a new object.</span>
+              </span>
+
+              <span class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/Action@2x.png">
+              <span class = "tooltiptext">Edit object specific and level rules.</span>
+              </span>
+
+              <span style="margin-right:20pt;" class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/Logic@2x.png">
+              <span class = "tooltiptext">View and make connections.</span>
+              </span>
+
+
+              <span class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/Earth@2x.png">
+              <span class = "tooltiptext">Edit global rules.</span>
+              </span>
+
+              <span class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/CommandLine@2x.png">
+              <span class = "tooltiptext">Open the Command line / Error log.</span>
+              </span>
+
+              <span class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/JavaScript@2x.png">
+              <span class = "tooltiptext">Write custom JavaScript. [Must be enabled in world settings!]</span>
+              </span>
+
+
+              <span style="float:right;" class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/PlaySpecial@2x.png">
+              <span class = "tooltiptext">Run a generated version of the game in a new tab.</span>
+              </span>
+
+              <span style="float:right;" class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/Play@2x.png">
+              <span class = "tooltiptext">Run the game in-editor.</span>
+              </span>
+
+              <span style="float:right;" class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Icons/Simulate@2x.png">
+              <span class = "tooltiptext">Run the game without controls so you can still add objects and edit some parts of the level.</span>
+              </span>
+
+              <span style="float:right; margin-right:20pt;" class="tooltip"><img style="padding:10px; border:solid 1px #0009;" height="50px" src="Assets/Haven/haven_mini.png">
+              <span class = "tooltiptext">Call for Haven or view Documentation.</span>
+              </span>
+              
+            </div>
 
             <!--Main editor body/game canvas-->
             <canvas
@@ -106,7 +159,67 @@
             >Your browser doesn't support HTML5 canvases. Try updating or downloading the latest version of Google Chrome or Brave.</canvas>
 
             <!--Seccondary editor section-->
-            <div id="secondaryEditorSection" class = "left editorSection">Sample Text</div>
+            <div id="secondaryEditorSection" class = "left editorSection">
+              <div class = "tab add-object">
+                <h1>Add an object</h1>
+                <input type = "number" id = "x" name = "x">
+                <label for = "x">X Location</label>
+                <input type = "number" id = "y" name = "y">
+                <label for = "y">Y Location</label>
+                <input type = "number" id = "width" name = "width">
+                <label for = "width">Width</label>
+                <input type = "number" id = "height" name = "height">
+                <label for = "height">Height</label>
+                <input type = "submit" id = "submit" name = "submit" value = "Add to game">
+              </div>
+              <div class = "tab global settings">
+                <h1>Level Settings</h1>
+                <hr>
+                <h2>Level structure</h2>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Snap to grid</label><br>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Snap to guides</label><br>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Overwrite world settings</label><br>
+
+                <hr>
+                <h2>Physics settings</h2>
+
+                Gravity Scale<br>
+                <input style="width:50%;" type="range" min="1" max="100" value="50" class="slider" id="myRange"><br>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Friction Enabled</label><br>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Fall damage</label><br>
+
+                <hr>
+                <h2>Visual Settings</h2>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Use shaders</label><br>
+
+                Shader Quality<br>
+                <input style="width:50%;" type="range" min="1" max="100" value="50" class="slider" id="myRange"><br>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Use Normals</label><br>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> PBR Advanced rendering</label><br>
+
+                Fog<br>
+                <input style="width:50%;" type="range" min="1" max="100" value="50" class="slider" id="myRange"><br>
+
+                <input type="checkbox" id="1" name="null" value="null">
+                <label for="1"> Bloom enabled</label><br>
+              </div>
+            </div>
         </div>
         
         
@@ -217,24 +330,33 @@
                     <p>I'll work on adding sound-less versions of all the sound features
                     (using some sort of transcript feature, most likely.)</p>
                     
-                    <a class = "button tooltip" id = "soundOn">Use sound
+                    <button class = "button tooltip" id = "soundOn">Use sound
                         <span class = "tooltiptext">Defaults to 20% volume. We don't want to blast your ears.</span>
-                    </a>
+                    </button>
                     
-                    <a class = "button tooltip" id = "soundOff">Disable sound
+                    <button class = "button tooltip" id = "soundOff">Disable sound
                         <span class = "tooltiptext">Sound will still be present when you run your game.<br>You can enable editor sounds later in the editor settings.</span>
-                    </a>
+                    </button>
                 </div>
             </div>
+        </div>
+
+        <!--Haven-->
+        <div class = "haven">
+          <h1>Error.</h1>
+          <hr>
+          <p>This is a prototype.</p>
+                    
+          <a class = "button tooltip" id = "sample">Sample
+            <span class = "tooltiptext">Sample Button</span>
+          </a>
         </div>
 
         <input type = "file" id = "test-upload">
         <input type = "text" id = "test-url">
         <textarea id = "json-input"></textarea>
-        <input type = "file" id = "json-upload">
 
         <div id = "save-json" style = "white-space : pre-wrap;"></div>
-        <a id = "download-link">Download current GameObject data</a>
         
     <!--jQuery, because I'm too lazy to type it up in basic javascript-->
         <script src = "jQuery.js"></script>
@@ -245,6 +367,7 @@
     <!--Custom library for file saving, loading, and management.-->
         <script src = "data.js"></script>
 
+        <script src = "ContextMenu.js"></script>
     <!--Primary engine code, not intended to display objects, but it will act as our main testing aria until we've finished with it.-->
         <!--script src = "engine.js"></script-->
         
